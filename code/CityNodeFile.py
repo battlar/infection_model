@@ -13,18 +13,18 @@ class CityNode:
         
 
         #其它相关参数
-        self.PeopleDensity=200.0#input("人口密度（0-200）：")#人口密度，单位：人/平方公里    分为三档：密集型200；平均型150；稀疏型10  故使用时除以200
+        self.PeopleDensity=100.0#input("人口密度（0-200）：")#人口密度，单位：人/平方公里    分为三档：密集型200；平均型150；稀疏型10  故使用时除以200
         self.CommuniDistance=120.0#input("社交距离（0-750）：")#城市中人口社交距离，单位：cm，分为四档：0-45，45-120，120-360，360-750 使用时除以750
         self.MaskPopular=0.2#城市中口罩普及率。随疫情严重而提高，随疫情缓和而下降
         self.TrafficWill=1.0#市内人口流动意愿，随疫情发展而降低，随疫情缓和而升高
         self.DeadRate=0.02#病情致死率不变(病患中移除的比例)
-        self.CureRate=0.0 #康复率(先暂定为定值，具体关系后续研究)
         self.Isolated=0.0#被感染者的隔离率
 
         #回归方程参数
-        self.R=20#一个周期内感染者接触到的人数,与健康人数负相关
-        self.beta=0.1#beta表示接触后健康人转化为病人的概率，原始传染率为1%
-        self.gama=0.02#gama表示致死率
+        self.R0=20#一个周期内感染者接触到的人数,与健康人数负相关
+        self.beta0=0.1#beta表示接触后健康人转化为病人的概率，原始传染率为1%
+        self.gama0=0.0#gama表示致死率
+        self.theta0=0.0#theta表示治愈率
         
 
     def get_i(self):#读取感染人数比例i
@@ -38,7 +38,7 @@ class CityNode:
         help=(
             "S0:配置初始健康人数（默认为10000）\n"
             "I0:配置初始患病人数（默认为1）\n"
-            "PD:配置人口密度（0-200 人/平方公里，默认为150）\n"
+            "PD:配置人口密度（0-200 人/平方公里，默认为100）\n"
             "CD:配置社交距离（0-750 厘米，默认为120）\n"
             "MP:配置口罩普及率（0-1，默认为0.2）\n"
             "TW:配置市民出行率（0-1，默认为1.0）\n"
@@ -71,8 +71,8 @@ class CityNode:
                 print("无效的输入\n")
 
     def SI_change(self,time):#使用SI模型进行模拟
-        self.beta=0.1*(1-self.CommuniDistance/750)*(1-self.MaskPopular)
-        self.R=20*(self.PeopleDensity/200)*self.TrafficWill
+        self.beta=self.beta0*(1-self.CommuniDistance/750)*(1-self.MaskPopular)
+        self.R=self.R0*(self.PeopleDensity/200)*self.TrafficWill
         ##后续补充其它条件,比如各项参数的动态变化,先当常量用着
 
         #更新每日感染人数
