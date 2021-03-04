@@ -18,7 +18,7 @@ class CityNode:
         self.MaskPopular=0.2#城市中口罩普及率。随疫情严重而提高，随疫情缓和而下降
         self.TrafficWill=1.0#市内人口流动意愿，随疫情发展而降低，随疫情缓和而升高
         self.DeadRate=0.02#病情致死率不变(病患中移除的比例)
-        self.Isolated=0.0#被感染者的隔离率
+        self.IsolatedRate=0.0#被感染者的隔离率
 
         #回归方程参数
         self.R0=20#一个周期内感染者接触到的人数,与健康人数负相关
@@ -35,37 +35,69 @@ class CityNode:
 
     def city_set(self):#设置不同参数，便于对比
         req="q"
+        temp=0
         help=(
-            "S0:配置初始健康人数（默认为10000）\n"
-            "I0:配置初始患病人数（默认为1）\n"
+            "S0:配置初始健康人数（2人以上,默认为10000）\n"
+            "I0:配置初始患病人数（1人以上，默认为1）\n"
             "PD:配置人口密度（0-200 人/平方公里，默认为100）\n"
             "CD:配置社交距离（0-750 厘米，默认为120）\n"
             "MP:配置口罩普及率（0-1，默认为0.2）\n"
             "TW:配置市民出行率（0-1，默认为1.0）\n"
-            "IS:配置隔离率（0-1，默认为0）\n"
-            "Q:退出配置\n"  
+            "IR:配置隔离率（0-1，默认为0）\n"
+            "Q:结束配置\n"  
             "H:打开帮助菜单\n"     
         )
         print(help)
+        print("-------------------------------------")
         while(1):
-            req=input("请输入您希望配置的参数：")
+            req=(input("请输入您希望配置的参数：").strip())
             if(req== "S0"):
-                self.HealthyS0=int(input("初始健康人数为："))
+                temp=float(input("初始健康人数为："))
+                if(temp<2):
+                    print("无效的输入")
+                else:
+                    self.HealthyS0=temp
             elif(req== "I0"):
-                self.InfectedI0=int(input("初始感染人数为："))
+                temp=float(input("初始感染人数为："))
+                if(temp<1 or temp>self.HealthyS0):
+                    print("无效的输入")
+                else:
+                    self.InfectedI0=temp
             elif(req=="PD"):
-                self.PeopleDensity=float(input("人口密度为："))
+                temp=float(input("人口密度为："))
+                if(temp<=0.0 or temp>200.0):
+                    print("无效的输入")
+                else:
+                    self.PeopleDensity=temp
             elif(req=="CD"):
-                self.CommuniDistance=float(input("社交距离为："))
+                temp=float(input("社交距离为："))
+                if(temp<0.0 or temp>750.0):
+                    print("无效的输入")
+                else:
+                    self.CommuniDistance=temp
             elif(req=="MP"):
-                self.MaskPopular=float(input("口罩普及率为："))
+                temp=float(input("口罩普及率为："))
+                if(temp<0.0 or temp>1.0):
+                    print("无效的输入")
+                else:
+                    self.MaskPopular=temp
             elif(req=="TW"):
-                self.MaskPopular=float(input("市民出行意愿为："))
-            elif(req=="IS"):
-                self.Isolated=float(input("被感染者隔离率为："))
+                self.TrafficWill=float(input("市民出行意愿为："))
+                if(temp<0.0 or temp>1.0):
+                    print("无效的输入")
+                else:
+                    self.TrafficWill=temp
+            elif(req=="IR"):
+                temp=float(input("被感染者隔离率为："))
+                if(temp<0.0 or temp>1.0):
+                    print("无效的输入")
+                else:
+                    self.IsolatedRate=temp
             elif(req=="H"):
                 print(help)
+                print("-------------------------------------")
             elif(req=="Q"):
+                print("配置已完成\n")
                 break
             else:
                 print("无效的输入\n")
@@ -77,7 +109,7 @@ class CityNode:
 
         #更新每日感染人数
         self.InfectedI=self.PeopleN*self.InfectedI0\
-            /(self.InfectedI0+(self.PeopleN-self.InfectedI0)*math.pow(math.e,-(self.beta*self.R*time*(1-self.Isolated))))
+            /(self.InfectedI0+(self.PeopleN-self.InfectedI0)*math.pow(math.e,-(self.beta*self.R*time*(1-self.IsolatedRate))))
 
         self.HealthyS=self.PeopleN-self.InfectedI
         self.s=self.HealthyS/self.PeopleN
